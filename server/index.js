@@ -1,3 +1,4 @@
+import fs from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import express from 'express'
@@ -8,6 +9,8 @@ import { CATEGORIES, STATUSES, PRIORITIES } from './constants.js'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const distDir = path.join(__dirname, '..', 'dist')
+const indexHtmlExists = fs.existsSync(path.join(distDir, 'index.html'))
+console.log(`Looking for built frontend at ${distDir} — index.html found: ${indexHtmlExists}`)
 
 await initDb()
 
@@ -157,7 +160,7 @@ app.delete('/api/tasks/:id', async (req, res) => {
 
 // ---- serve built frontend (production) ----
 app.use(express.static(distDir))
-app.get(/^\/(?!api\/).*/, (req, res) => {
+app.get('/{*splat}', (req, res) => {
   res.sendFile(path.join(distDir, 'index.html'), (err) => {
     if (err) res.status(404).send('Not built yet — run `npm run build`.')
   })
